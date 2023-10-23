@@ -8,6 +8,7 @@ services:
       - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
+
     command: postgres -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all -c max_connections=200
     healthcheck:
       test: pg_isready -U postgres -h 127.0.0.1
@@ -18,7 +19,7 @@ services:
     volumes:
       - redis:/data
     ports:
-      - 6379
+      - 6379:6379
     healthcheck:
       test: redis-cli ping
       interval: 1s
