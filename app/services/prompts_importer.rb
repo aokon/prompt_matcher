@@ -18,6 +18,7 @@ class PromptsImporter
     fetch_prompts_presets.then { |response| parse_response(response) }
       .then { |rows| prepare_prompts(rows) }
       .then { |prompts| store_in_db(prompts) }
+      .then { model.reindex }
   end
 
   private
