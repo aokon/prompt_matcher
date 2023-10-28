@@ -3,34 +3,45 @@
 class PromptsImporter
   PromptDownloadFailed = Class.new(StandardError)
   InvalidPresetsSchema = Class.new(StandardError)
+  DEFAULT_PAGE_DOWNLOAD = 1
 
-  PRESETS_URL = "datasets-server.huggingface.co/rows?dataset=Gustavosta%2FStable-Diffusion-Prompts&config=default&split=train&offset=0&length=100"
-
-  def self.call
-    new.call
-  end
-
-  def initialize(model: Prompt)
+  def initialize(model: Prompt, download_pages: DEFAULT_PAGE_DOWNLOAD)
     @model = model
+    @hydra = Typhoeus::Hydra.new
+    @download_pages = download_pages || DEFAULT_PAGE_DOWNLOAD
   end
 
   def call
-    fetch_prompts_presets.then { |response| parse_response(response) }
-      .then { |rows| prepare_prompts(rows) }
-      .then { |prompts| store_in_db(prompts) }
-      .then { model.reindex }
+    requests = prepare_requests
+    hydra.run
+    requests.each do |req|
+      if req.response.success?
+        process_response(req.response.body)
+        next
+      end
+
+      raise PromptDownloadFailed, "Something went wrong during fetching data presents"
+    end
   end
 
   private
 
-  attr_reader :model
+  attr_reader :model, :hydra, :download_pages
 
-  def fetch_prompts_presets
-    response = Typhoeus.get(PRESETS_URL, followlocation: true)
+  def prepare_requests
+    download_pages.times.map do |t|
+      url = "datasets-server.huggingface.co/rows?dataset=Gustavosta%2FStable-Diffusion-Prompts&config=default&split=train&offset=#{t}&length=100"
+      request = Typhoeus::Request.new(url, followlocation: true)
+      hydra.queue(request)
+      request
+    end
+  end
 
-    raise PromptDownloadFailed, "Something went wrong during fetching data presents" unless response.success?
-
-    response.body
+  def process_response(response)
+    parse_response(response)
+      .then { |rows| prepare_prompts(rows) }
+      .then { |prompts| store_in_db(prompts) }
+      .then { model.reindex }
   end
 
   def parse_response(response)

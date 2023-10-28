@@ -2,7 +2,7 @@
 
 RSpec.describe PromptsImporter, type: :services do
   describe "#call" do
-    subject(:importer) { described_class.new(model: Prompt) }
+    subject(:importer) { described_class.new }
 
     context "when import is success" do
       let(:prompts_response) do
@@ -15,6 +15,12 @@ RSpec.describe PromptsImporter, type: :services do
 
       it "creates  new records" do
         expect { importer.call }.to change { Prompt.count }.by(2)
+      end
+
+      it "reindexes prompts in es" do
+        expect(Prompt).to receive(:reindex).once
+
+        importer.call
       end
     end
 
