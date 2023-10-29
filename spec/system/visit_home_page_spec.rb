@@ -1,8 +1,9 @@
 require "rails_helper"
 
-RSpec.describe "Visit home pages", type: :system do
+RSpec.describe "Visit home pages", type: :system, es: true do
   before do
     driven_by(:rack_test)
+    Prompt.reindex
   end
 
   context "when search is not used" do

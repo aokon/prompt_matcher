@@ -69,7 +69,8 @@ RSpec.configure do |config|
     ])
   end
 
-  config.after(:suite) do
-    Prompt.searchkick_index.delete
+  config.before :each, es: true do
+    Prompt.searchkick_index.delete if Prompt.searchkick_index.exists?
+    Prompt.searchkick_index.create
   end
 end

@@ -2,7 +2,7 @@
 
 class Prompt < ApplicationRecord
   validates :content, presence: true
-  searchkick index_name: -> { "#{name.tableize}-#{Rails.env}" }
+  searchkick index_name: -> { "#{name.tableize}-#{Rails.env}" }, callbacks: :async
 
   def search_data
     {content: content}
