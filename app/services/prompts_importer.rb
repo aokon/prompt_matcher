@@ -9,6 +9,7 @@ class PromptsImporter
     @model = model
     @hydra = Typhoeus::Hydra.new
     @download_pages = download_pages || DEFAULT_PAGE_DOWNLOAD
+    @signatures = []
   end
 
   def call
@@ -26,7 +27,7 @@ class PromptsImporter
 
   private
 
-  attr_reader :model, :hydra, :download_pages
+  attr_reader :model, :hydra, :download_pages, :signatures
 
   def prepare_requests
     download_pages.times.map do |t|
@@ -55,8 +56,13 @@ class PromptsImporter
   def prepare_prompts(rows)
     rows.map do |item|
       content = ActionController::Base.helpers.sanitize(item.dig(:row, :Prompt))
+      signature = Base64.encode64(content)
+
+      next if signatures.include?(signature)
+
+      signatures.push(signature)
       {content:}
-    end
+    end.compact
   end
 
   def store_in_db(prompts)

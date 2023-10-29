@@ -24,6 +24,20 @@ RSpec.describe PromptsImporter, type: :services do
       end
     end
 
+    context "when data from source contains dublicates" do
+      let(:prompts_response) do
+        File.read(Rails.root.join("spec", "fixtures", "prompts_response_with_duplicates.json"))
+      end
+
+      before do
+        stub_request(:get, /datasets-server.huggingface.co/).and_return(body: prompts_response, status: 200)
+      end
+
+      it "creates  new records" do
+        expect { importer.call }.to change { Prompt.count }.by(2)
+      end
+    end
+
     context "when fetching presets reached timeout" do
       before do
         stub_request(:get, /datasets-server.huggingface.co/).and_return(status: 408)
