@@ -65,7 +65,8 @@ RSpec.configure do |config|
   # config.filter_gems_from_backtrace("gem name")
   config.before(:suite) do
     WebMock.disable_net_connect!(allow: [
-      /localhost:9200/
+      /localhost:9200/,
+      /es01:9200/
     ])
   end
 

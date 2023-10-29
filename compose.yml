@@ -1,6 +1,51 @@
 version: "3.8"
 
+x-app: &app
+  build:
+    context: .
+    dockerfile: ./Dockerfile.dev
+  image: prompt-matcher-dev:1.0.0
+
+x-backend: &backend
+  <<: *app
+  stdin_open: true
+  tty: true
+  volumes:
+    - .:/rails:cached
+    - bundle:/usr/local/bundle
+    - node_modules:/rails/node_modules
+    - rails_cache:/rails/tmp/cache:rw
+    - history:/usr/local/hist
+  environment:
+    BOOTSNAP_CACHE_DIR: /rails/tmp/cache
+    EDITOR: vi
+  env_file:
+    - .env
+  depends_on:
+    redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+    es01:
+      condition: service_healthy
+
 services:
+  app:
+    <<: *backend
+    ports:
+      - 3000:3000
+    command: bin/dev
+
+  repl:
+    <<: *backend
+    command: bin/rails c
+
+  specs:
+    <<: *backend
+    command: bundle exec rspec
+    environment:
+      RAILS_ENV: test
+
   postgres:
     image: postgres:16.0
     environment:
@@ -177,4 +222,12 @@ volumes:
   kibanadata:
     driver: local
   certs:
+    driver: local
+  bundle:
+    driver: local
+  history:
+    driver: local
+  rails_cache:
+    driver: local
+  node_modules:
     driver: local
