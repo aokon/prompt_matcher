@@ -2,7 +2,7 @@
 
 RSpec.describe PromptsSearch, type: :services, es: true do
   describe "#call" do
-    subject(:search) { described_class.new(phrase:) }
+    subject(:search) { described_class.new(phrase:, page: 1) }
 
     let(:phrase) { "car" }
 
