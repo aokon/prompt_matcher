@@ -1,18 +1,16 @@
 version: "3.8"
 
-x-app: &app
+x-backend: &backend
   build:
     context: .
     dockerfile: ./Dockerfile.dev
   image: prompt-matcher-dev:1.0.0
-
-x-backend: &backend
-  <<: *app
   stdin_open: true
   tty: true
   volumes:
     - .:/rails:cached
     - bundle:/usr/local/bundle
+    - node:/usr/local/node
     - node_modules:/rails/node_modules
     - rails_cache:/rails/tmp/cache:rw
     - history:/usr/local/hist
@@ -21,19 +19,18 @@ x-backend: &backend
     EDITOR: vi
   env_file:
     - .env
+  user: "rails:rails"
   depends_on:
     redis:
       condition: service_healthy
     postgres:
-      condition: service_healthy
-    es01:
       condition: service_healthy
 
 services:
   app:
     <<: *backend
     ports:
-      - 3000:3000
+      - "3000:3000"
     command: bin/dev
 
   repl:
@@ -230,4 +227,6 @@ volumes:
   rails_cache:
     driver: local
   node_modules:
+    driver: local
+  node:
     driver: local
