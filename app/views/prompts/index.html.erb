@@ -7,17 +7,24 @@
     </div>
   <% end %>
 
-  <% if @prompts.blank? %>
-    <p class="text-lg text-gray-700 mb-5">Discover more with our powerful search. Find what you're looking for quickly and easily.</p>
-
-    <%= render partial: "fake_result" %>
-    <%= render partial: "fake_result" %>
-  <% else %>
+  <% if params[:q] && @prompts.any? %>
     <h2 class="text-xl font-semibold mb-5">Found <%= @prompts.total_count %> items for phrase "<%= params[:q] %>"</h2>
     <%- @prompts.each do |prompt| %>
       <%= render partial: "result", locals:  { prompt: prompt } %>
     <% end %>
+  <% elsif params[:q] && @prompts.blank? && params[:page].blank? %>
+    <p class="text-lg text-gray-700 mb-5">Couldn't find any results for phrase: <strong><%= params[:q] %></strong></p>
+
+    <%= render partial: "fake_result" %>
+    <%= render partial: "fake_result" %>
+  <% else %>
+    <p class="text-lg text-gray-700 mb-5">Discover more with our powerful search. Find what you're looking for quickly and easily.</p>
+
+    <%= render partial: "fake_result" %>
+    <%= render partial: "fake_result" %>
   <% end %>
 
-  <%= paginate @prompts %>
+  <% if params[:q] && @prompts.any? %>
+    <%= paginate @prompts %>
+  <% end %>
 </div>

@@ -11,6 +11,7 @@ Rails app where you can search prompts from huggingface.
 * nodejs
 * esbuild
 * yarn
+* docker - optional
 
 ## Setup
 
@@ -68,6 +69,8 @@ Execute following command: `bin/dev`
 ### Docker version
 
 Execute following command: `docker compose up app`
+
+Note: I have noticed that sometimes there there is missed folder permission for `tmp/cache`, but it may be releated to my local env.
 
 ## Test
 

@@ -9,7 +9,6 @@ if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
 
-echo "hello"
 export PATH=/usr/local/node/bin:$PATH
 
 exec "${@}"
